@@ -7,11 +7,17 @@ const config: Config = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    fontFamily: {
+      base: ["Binggrae"],
+    },
     extend: {
-      backgroundImage: {
-        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic":
-          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      colors: {
+        comment: "#898C96",
+        border: "#EEEEF0",
+        primary: "#00D4B7",
+        background: {
+          primary: "#00D4B733",
+        },
       },
     },
   },
