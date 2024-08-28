@@ -15,7 +15,7 @@ const Header = () => {
           height="32"
         />
       </Link>
-      {auth ? (
+      {auth.access_token ? (
         <LogoutButton />
       ) : (
         <Link href="/login" className="font-bold text-comment">
