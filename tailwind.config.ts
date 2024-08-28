@@ -9,6 +9,7 @@ const config: Config = {
   theme: {
     fontFamily: {
       base: ["Binggrae"],
+      password: ["Pretendard-Regular"],
     },
     extend: {
       colors: {
@@ -19,6 +20,9 @@ const config: Config = {
           primary: "#00D4B733",
         },
       },
+    },
+    width: {
+      sign: "500px",
     },
   },
   plugins: [],
