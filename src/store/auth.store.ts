@@ -1,6 +1,6 @@
 import { LoginResponseDto } from "@/types/dto/auth.dto";
+import cookie from "react-cookies";
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
 
 interface AuthState {
   auth: LoginResponseDto | null | undefined;
@@ -8,18 +8,16 @@ interface AuthState {
   logout: () => void;
 }
 
-const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      auth: undefined,
-      login: (auth) => set({ auth: auth }),
-      logout: () => set({ auth: undefined }),
-    }),
-    {
-      name: "auth",
-      storage: createJSONStorage(() => sessionStorage),
-    }
-  )
-);
+const useAuthStore = create<AuthState>()((set) => ({
+  auth: undefined,
+  login: (auth) => {
+    cookie.save("auth", JSON.stringify(auth), {});
+    set({ auth: auth });
+  },
+  logout: () => {
+    cookie.remove("auth");
+    set({ auth: undefined });
+  },
+}));
 
 export default useAuthStore;
