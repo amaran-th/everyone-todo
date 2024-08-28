@@ -1,10 +1,13 @@
-import { getAuthFromCookie } from "@/lib/utils/auth";
+"use client";
+
+import { useAppSelector } from "@/lib/hooks/redux";
 import Image from "next/image";
 import Link from "next/link";
 import LogoutButton from "./LogoutButton";
 
 const Header = () => {
-  const auth = getAuthFromCookie();
+  const auth = useAppSelector((state) => state.auth.value);
+  console.log(auth);
   return (
     <div className="fixed left-0 top-0 flex h-[62px] w-[100vw] items-center justify-between gap-8 border-b border-comment bg-white px-8">
       <Link href="/">
