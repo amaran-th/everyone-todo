@@ -15,3 +15,17 @@ export const useLogin = () =>
       return response?.data;
     },
   });
+
+export const useMemberCreate = () =>
+  useAxiosMutation({
+    mutationFn: async ({
+      username,
+      password,
+    }: LoginRequestDto): Promise<LoginResponseDto | null> => {
+      const response = await client.post(`/Auth/register`, {
+        username,
+        password,
+      });
+      return response?.data;
+    },
+  });
