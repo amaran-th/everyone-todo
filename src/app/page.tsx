@@ -10,7 +10,7 @@ const Page = () => {
     useState<boolean>(false);
   return (
     <>
-      <div className="flex-grow justify-center flex gap-8">
+      <div className="flex-grow justify-center flex gap-8 pt-4">
         {Object.values(TaskStatus).map((status) => (
           <TaskGroup
             key={status}
