@@ -11,9 +11,19 @@ import { toast } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
 
-import { BusinessError } from "@/types/error";
+import { BusinessError, UnauthorizedError } from "@/types/error";
+import { redirect, RedirectType, usePathname } from "next/navigation";
 
-const handleError = (error: Error) => {
+const handleError = (error: Error, pathname: string) => {
+  if (error instanceof UnauthorizedError) {
+    toast.error("로그인이 필요합니다.");
+    redirect(
+      `${process.env.NEXT_PUBLIC_CLIENT_URL}/login?redirect=${
+        process.env.NEXT_PUBLIC_CLIENT_URL + pathname
+      }`,
+      RedirectType.replace
+    );
+  }
   if (
     error instanceof BusinessError &&
     error.originalError instanceof AxiosError &&
@@ -28,12 +38,13 @@ export const useAxiosQuery = <TQueryFnData>(
 ) => {
   const query = useQuery<TQueryFnData>(options);
   const { error, isError } = query;
+  const pathname = usePathname();
 
   useEffect(() => {
     if (isError) {
-      handleError(error);
+      handleError(error, pathname);
     }
-  }, [error, isError]);
+  }, [error, isError, pathname]);
 
   return query;
 };
@@ -43,12 +54,13 @@ export const useAxiosMutation = <TData, TVariables>(
 ) => {
   const mutation = useMutation<TData, DefaultError, TVariables>(options);
   const { error, isError } = mutation;
+  const pathname = usePathname();
 
   useEffect(() => {
     if (isError) {
-      handleError(error);
+      handleError(error, pathname);
     }
-  }, [error, isError]);
+  }, [error, isError, pathname]);
 
   return mutation;
 };
