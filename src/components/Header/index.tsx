@@ -7,7 +7,6 @@ import LogoutButton from "./LogoutButton";
 
 const Header = () => {
   const auth = useAppSelector((state) => state.auth.value);
-  console.log(auth);
   return (
     <div className="fixed left-0 top-0 flex h-[62px] w-[100vw] items-center justify-between gap-8 border-b border-comment bg-white px-8">
       <Link href="/">
