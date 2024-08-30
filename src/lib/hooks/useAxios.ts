@@ -6,17 +6,24 @@ import {
   UseQueryOptions,
 } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { toast } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
 
+import { logout } from "@/store/auth.slice";
 import { BusinessError, UnauthorizedError } from "@/types/error";
 import { redirect, RedirectType, usePathname } from "next/navigation";
+import { useAppDispatch } from "./redux";
 
-const handleError = (error: Error, pathname: string) => {
+const handleError = (
+  error: Error,
+  pathname: string,
+  handleLogout: () => void
+) => {
   if (error instanceof UnauthorizedError) {
     toast.error("로그인이 필요합니다.");
+    handleLogout();
     redirect(
       `${process.env.NEXT_PUBLIC_CLIENT_URL}/login?redirect=${
         process.env.NEXT_PUBLIC_CLIENT_URL + pathname
@@ -39,12 +46,16 @@ export const useAxiosQuery = <TQueryFnData>(
   const query = useQuery<TQueryFnData>(options);
   const { error, isError } = query;
   const pathname = usePathname();
+  const dispatch = useAppDispatch();
+  const handleLogout = useCallback(() => {
+    dispatch(logout());
+  }, [dispatch]);
 
   useEffect(() => {
     if (isError) {
-      handleError(error, pathname);
+      handleError(error, pathname, handleLogout);
     }
-  }, [error, isError, pathname]);
+  }, [error, handleLogout, isError, pathname]);
 
   return query;
 };
@@ -55,12 +66,16 @@ export const useAxiosMutation = <TData, TVariables>(
   const mutation = useMutation<TData, DefaultError, TVariables>(options);
   const { error, isError } = mutation;
   const pathname = usePathname();
+  const dispatch = useAppDispatch();
+  const handleLogout = useCallback(() => {
+    dispatch(logout());
+  }, [dispatch]);
 
   useEffect(() => {
     if (isError) {
-      handleError(error, pathname);
+      handleError(error, pathname, handleLogout);
     }
-  }, [error, isError, pathname]);
+  }, [error, handleLogout, isError, pathname]);
 
   return mutation;
 };
