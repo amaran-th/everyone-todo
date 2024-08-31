@@ -9,7 +9,8 @@ export const useTodoQuery = (
   page_size?: number,
   page_num?: number
 ) =>
-  useAxiosQuery({
+  useAxiosQuery<TaskPageableResponseDto | null>({
+    ...{ keepPreviousData: true },
     queryKey: QueryKeys.TASKS(todo_status, page_size, page_num),
     queryFn: async (): Promise<TaskPageableResponseDto | null> => {
       const response = await client.get(`/Todo`, {
@@ -54,6 +55,21 @@ export const useBackLogFileImport = () =>
       formdata.append("file", file!);
       await authClient.post("/Todo/import", formdata, {
         headers: { "Content-Type": "multipart/form-data" },
+      });
+    },
+  });
+
+export const useTodoChangeStatus = () =>
+  useAxiosMutation({
+    mutationFn: async ({
+      todo_id,
+      new_status,
+    }: {
+      todo_id: string;
+      new_status: string;
+    }) => {
+      await authClient.patch(`/Todo/${todo_id}/status`, null, {
+        params: { new_status },
       });
     },
   });
