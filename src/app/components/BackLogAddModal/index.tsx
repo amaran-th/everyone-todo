@@ -26,7 +26,7 @@ const BackLogAddModal = ({ isOpen, onClose }: BackLogAddModalProps) => {
 
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 flex justify-center items-center">
+    <div className="fixed inset-0 flex justify-center items-center backdrop-blur-sm">
       <div
         ref={ref}
         className="bg-white shadow-md border border-border rounded-md flex-1 w-full max-w-[700px] flex-col gap-4 p-4 pb-8 flex"
