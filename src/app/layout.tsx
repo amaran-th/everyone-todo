@@ -23,7 +23,7 @@ export default function RootLayout({
           <ReactQueryProvider>
             <ReduxProvider>
               <Header />
-              <div className="from-background-primary flex justify-center min-h-[calc(100vh-128px)] bg-white bg-gradient-to-b to-white to-50% pt-[62px]">
+              <div className="from-background-primary min-h-[calc(100vh-128px)] bg-white bg-gradient-to-b to-white to-50% pt-[62px]">
                 {children}
               </div>
               <ToastContainer autoClose={1500} position="bottom-right" />

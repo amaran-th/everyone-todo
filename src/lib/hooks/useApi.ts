@@ -4,15 +4,20 @@ import { TaskStatus } from "@/types/dto/task.dto";
 import { authClient, client } from "../api/client.axios";
 import { useAxiosInfiniteQuery, useAxiosMutation } from "./useAxios";
 
-export const useTodoQuery = (todo_status?: TaskStatus) =>
+export const useTodoQuery = (todo_status: TaskStatus, keyword: string) =>
   useAxiosInfiniteQuery({
     queryKey: QueryKeys.TASKS(todo_status), // 쿼리 키
     queryFn: async ({ pageParam }) => {
+      const searchParam =
+        keyword.trim().charAt(0) === "@"
+          ? { username: keyword.slice(1) }
+          : { title: keyword };
       const response = await client.get(`/Todo`, {
         params: {
           todo_status,
           page_size: 20,
           page_number: pageParam,
+          ...searchParam,
         },
       });
       return response.data;

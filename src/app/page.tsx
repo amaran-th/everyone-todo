@@ -8,11 +8,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import BackLogAddModal from "./components/BackLogAddModal";
+import SearchBar from "./components/SearchBar";
 import TaskGroup from "./components/TaskGroup";
 
 const Page = () => {
   const [backlogAddModalOpen, setBacklogAddModalOpen] =
     useState<boolean>(false);
+  const [keyword, setKeyword] = useState<string>("");
   const { mutate: changeTaskStatus } = useTodoChangeStatus();
   const queryClient = useQueryClient();
 
@@ -55,12 +57,14 @@ const Page = () => {
   };
   return (
     <>
-      <div className="flex-grow justify-center flex gap-8 pt-4">
+      <SearchBar keyword={keyword} setKeyword={setKeyword} />
+      <div className="w-full justify-center flex gap-8 pt-4">
         <DragDropContext onDragEnd={onDragEnd}>
           {Object.values(TaskStatus).map((status) => (
             <TaskGroup
               key={status}
               status={status}
+              keyword={keyword}
               openBackLogAddModal={() => setBacklogAddModalOpen(true)}
             />
           ))}

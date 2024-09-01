@@ -10,10 +10,15 @@ import Task from "../Task";
 
 interface TaskGroupProps {
   status: TaskStatus;
+  keyword: string;
   openBackLogAddModal: () => void;
 }
 
-const TaskGroup = ({ status, openBackLogAddModal }: TaskGroupProps) => {
+const TaskGroup = ({
+  status,
+  keyword,
+  openBackLogAddModal,
+}: TaskGroupProps) => {
   const taskGroup = useAppSelector((state) => state.tasks.value);
   const dispatch = useAppDispatch();
 
@@ -22,7 +27,7 @@ const TaskGroup = ({ status, openBackLogAddModal }: TaskGroupProps) => {
     isFetching,
     fetchNextPage,
     hasNextPage,
-  } = useTodoQuery(status);
+  } = useTodoQuery(status, keyword);
 
   const observer = useRef<IntersectionObserver | null>(null);
   const lastTaskElementRef = useCallback(
