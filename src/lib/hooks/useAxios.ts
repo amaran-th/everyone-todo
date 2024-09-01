@@ -1,5 +1,8 @@
 import {
   DefaultError,
+  useInfiniteQuery,
+  UseInfiniteQueryOptions,
+  UseInfiniteQueryResult,
   useMutation,
   UseMutationOptions,
   useQuery,
@@ -44,6 +47,26 @@ export const useAxiosQuery = <TQueryFnData>(
   options: UseQueryOptions<TQueryFnData>
 ) => {
   const query = useQuery<TQueryFnData>(options);
+  const { error, isError } = query;
+  const pathname = usePathname();
+  const dispatch = useAppDispatch();
+  const handleLogout = useCallback(() => {
+    dispatch(logout());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isError) {
+      handleError(error, pathname, handleLogout);
+    }
+  }, [error, handleLogout, isError, pathname]);
+
+  return query;
+};
+
+export const useAxiosInfiniteQuery = <TData, TError = AxiosError>(
+  options: UseInfiniteQueryOptions<TData, DefaultError, TData>
+): UseInfiniteQueryResult<TData, DefaultError> => {
+  const query = useInfiniteQuery<TData, DefaultError, TData>(options);
   const { error, isError } = query;
   const pathname = usePathname();
   const dispatch = useAppDispatch();

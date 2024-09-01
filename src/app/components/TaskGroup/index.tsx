@@ -1,8 +1,11 @@
+import { useAppDispatch, useAppSelector } from "@/lib/hooks/redux";
 import { useTodoQuery } from "@/lib/hooks/useApi";
-import { TaskStatus } from "@/types/dto/task.dto";
+import { initializeTasks, setTasks } from "@/store/task.slice";
+import { TaskResponseDto, TaskStatus } from "@/types/dto/task.dto";
 import { Droppable } from "@hello-pangea/dnd";
 import { CgMathPlus } from "@react-icons/all-files/cg/CgMathPlus";
 import classNames from "classnames";
+import { useCallback, useEffect, useRef } from "react";
 import Task from "../Task";
 
 interface TaskGroupProps {
@@ -11,7 +14,54 @@ interface TaskGroupProps {
 }
 
 const TaskGroup = ({ status, openBackLogAddModal }: TaskGroupProps) => {
-  const { data: loadedTasks } = useTodoQuery(status, 20, 0);
+  const taskGroup = useAppSelector((state) => state.tasks.value);
+  const dispatch = useAppDispatch();
+
+  const {
+    data: loadedTasks,
+    isFetching,
+    fetchNextPage,
+    hasNextPage,
+  } = useTodoQuery(status);
+
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastTaskElementRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (isFetching || !hasNextPage) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage();
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [fetchNextPage, isFetching, hasNextPage]
+  );
+  useEffect(() => {
+    if (loadedTasks) {
+      console.log(loadedTasks);
+      dispatch(
+        setTasks({
+          status,
+          tasks: loadedTasks.pages.flatMap(
+            (page: { todos: TaskResponseDto[] }) => page.todos
+          ),
+        })
+      );
+    }
+  }, [loadedTasks, dispatch, status]);
+
+  useEffect(() => {
+    if (!taskGroup[status].initialized && loadedTasks) {
+      dispatch(
+        initializeTasks({
+          status,
+          tasks: loadedTasks.pages[0],
+        })
+      );
+    }
+  }, [dispatch, loadedTasks, status, taskGroup]);
 
   return (
     <div className="flex flex-col gap-1 flex-1 w-full max-w-[300px]">
@@ -38,9 +88,16 @@ const TaskGroup = ({ status, openBackLogAddModal }: TaskGroupProps) => {
               snapshot.isDraggingOver && "bg-border"
             )}
           >
-            {loadedTasks?.todos.map((task, index) => (
-              <Task task={task} index={index} key={task.todo_id} />
-            ))}
+            {taskGroup[status].tasks?.map((task, index) => {
+              if (taskGroup[status].tasks.length === index + 1) {
+                return (
+                  <div ref={lastTaskElementRef} key={task.todo_id}>
+                    <Task task={task} index={index} />
+                  </div>
+                );
+              }
+              return <Task task={task} index={index} key={task.todo_id} />;
+            })}
             {provided.placeholder}
           </div>
         )}

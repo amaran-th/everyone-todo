@@ -1,23 +1,31 @@
 import { QueryKeys } from "@/data/queryKey";
 import { LoginRequestDto, LoginResponseDto } from "@/types/dto/auth.dto";
-import { TaskPageableResponseDto, TaskStatus } from "@/types/dto/task.dto";
+import { TaskStatus } from "@/types/dto/task.dto";
 import { authClient, client } from "../api/client.axios";
-import { useAxiosMutation, useAxiosQuery } from "./useAxios";
+import { useAxiosInfiniteQuery, useAxiosMutation } from "./useAxios";
 
-export const useTodoQuery = (
-  todo_status?: TaskStatus,
-  page_size?: number,
-  page_num?: number
-) =>
-  useAxiosQuery<TaskPageableResponseDto | null>({
-    ...{ keepPreviousData: true },
-    queryKey: QueryKeys.TASKS(todo_status, page_size, page_num),
-    queryFn: async (): Promise<TaskPageableResponseDto | null> => {
+export const useTodoQuery = (todo_status?: TaskStatus) =>
+  useAxiosInfiniteQuery({
+    queryKey: QueryKeys.TASKS(todo_status), // 쿼리 키
+    queryFn: async ({ pageParam }) => {
       const response = await client.get(`/Todo`, {
-        params: { todo_status, page_size, page_num },
+        params: {
+          todo_status,
+          page_size: 20,
+          page_number: pageParam,
+        },
       });
-      return response?.data;
+      return response.data;
     },
+    getNextPageParam: (lastPage) => {
+      const { current_page, total_pages } = lastPage;
+      if (current_page < total_pages) {
+        return current_page + 1;
+      } else {
+        return undefined;
+      }
+    },
+    initialPageParam: 1,
   });
 
 export const useLogin = () =>
