@@ -20,6 +20,7 @@ const TaskGroup = ({
   openBackLogAddModal,
 }: TaskGroupProps) => {
   const taskGroup = useAppSelector((state) => state.tasks.value);
+  const userId = useAppSelector((state) => state.auth.value.user_id);
   const dispatch = useAppDispatch();
 
   const {
@@ -72,7 +73,7 @@ const TaskGroup = ({
     <div className="flex flex-col gap-1 flex-1 w-full max-w-[300px]">
       <div className="flex justify-between items-center">
         <p className="font-bold">{status}</p>
-        {status === TaskStatus.BACKLOG && (
+        {status === TaskStatus.BACKLOG && userId > 0 && (
           <button
             onClick={openBackLogAddModal}
             className="rounded-md border-border px-1 bg-gray-300"

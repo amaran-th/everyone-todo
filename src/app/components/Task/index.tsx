@@ -10,7 +10,10 @@ interface TaskProps {
 
 const Task = ({ task, index }: TaskProps) => {
   const auth = useAppSelector((state) => state.auth.value);
-  if (task.owner_id === auth.user_id || task.owner_id === null)
+  if (
+    auth.user_id > 0 &&
+    (task.owner_id === auth.user_id || task.owner_id === null)
+  )
     return (
       <Draggable
         key={task.todo_id}
@@ -36,7 +39,7 @@ const Task = ({ task, index }: TaskProps) => {
           >
             <div className="flex w-full">
               <p className="font-bold flex-grow truncate">{task.title}</p>
-              {task.owner_id && (
+              {task.owner_id > 0 && (
                 <p className="text-primary text-xs">@{task.owner_name}</p>
               )}
             </div>
@@ -53,12 +56,14 @@ const Task = ({ task, index }: TaskProps) => {
   return (
     <div
       className={classNames(
-        "w-full bg-white rounded-md border border-border shadow-md p-2 transition-colors hover:bg-border touch-none"
+        "select-none w-full bg-white rounded-md border border-border shadow-md p-2 transition-colors hover:bg-border touch-none"
       )}
     >
       <div className="flex w-full">
         <p className="font-bold flex-grow truncate">{task.title}</p>
-        <p className="text-primary text-xs">@{task.owner_name}</p>
+        {task.owner_id > 0 && (
+          <p className="text-primary text-xs">@{task.owner_name}</p>
+        )}
       </div>
       <p
         className="text-comment text-sm text-ellipsis overflow-hidden"
