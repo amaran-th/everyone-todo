@@ -1,19 +1,39 @@
 import {
   DefaultError,
+  useInfiniteQuery,
+  UseInfiniteQueryOptions,
+  UseInfiniteQueryResult,
   useMutation,
   UseMutationOptions,
   useQuery,
   UseQueryOptions,
 } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { toast } from "react-toastify";
 
 import "react-toastify/dist/ReactToastify.css";
 
-import { BusinessError } from "@/types/error";
+import { logout } from "@/store/auth.slice";
+import { BusinessError, UnauthorizedError } from "@/types/error";
+import { redirect, RedirectType, usePathname } from "next/navigation";
+import { useAppDispatch } from "./redux";
 
-const handleError = (error: Error) => {
+const handleError = (
+  error: Error,
+  pathname: string,
+  handleLogout: () => void
+) => {
+  if (error instanceof UnauthorizedError) {
+    toast.error("로그인이 필요합니다.");
+    handleLogout();
+    redirect(
+      `${process.env.NEXT_PUBLIC_CLIENT_URL}/login?redirect=${
+        process.env.NEXT_PUBLIC_CLIENT_URL + pathname
+      }`,
+      RedirectType.replace
+    );
+  }
   if (
     error instanceof BusinessError &&
     error.originalError instanceof AxiosError &&
@@ -28,12 +48,37 @@ export const useAxiosQuery = <TQueryFnData>(
 ) => {
   const query = useQuery<TQueryFnData>(options);
   const { error, isError } = query;
+  const pathname = usePathname();
+  const dispatch = useAppDispatch();
+  const handleLogout = useCallback(() => {
+    dispatch(logout());
+  }, [dispatch]);
 
   useEffect(() => {
     if (isError) {
-      handleError(error);
+      handleError(error, pathname, handleLogout);
     }
-  }, [error, isError]);
+  }, [error, handleLogout, isError, pathname]);
+
+  return query;
+};
+
+export const useAxiosInfiniteQuery = <TData, TError = AxiosError>(
+  options: UseInfiniteQueryOptions<TData, DefaultError, TData>
+): UseInfiniteQueryResult<TData, DefaultError> => {
+  const query = useInfiniteQuery<TData, DefaultError, TData>(options);
+  const { error, isError } = query;
+  const pathname = usePathname();
+  const dispatch = useAppDispatch();
+  const handleLogout = useCallback(() => {
+    dispatch(logout());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isError) {
+      handleError(error, pathname, handleLogout);
+    }
+  }, [error, handleLogout, isError, pathname]);
 
   return query;
 };
@@ -43,12 +88,17 @@ export const useAxiosMutation = <TData, TVariables>(
 ) => {
   const mutation = useMutation<TData, DefaultError, TVariables>(options);
   const { error, isError } = mutation;
+  const pathname = usePathname();
+  const dispatch = useAppDispatch();
+  const handleLogout = useCallback(() => {
+    dispatch(logout());
+  }, [dispatch]);
 
   useEffect(() => {
     if (isError) {
-      handleError(error);
+      handleError(error, pathname, handleLogout);
     }
-  }, [error, isError]);
+  }, [error, handleLogout, isError, pathname]);
 
   return mutation;
 };

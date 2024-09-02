@@ -1,12 +1,14 @@
 "use client";
 
+import { useAppDispatch } from "@/lib/hooks/redux";
 import { useLogin } from "@/lib/hooks/useApi";
-import useAuthStore from "@/store/auth.store";
-import { LoginRequestDto } from "@/types/dto/auth.dto";
+import { login } from "@/store/auth.slice";
+import { LoginRequestDto, LoginResponseDto } from "@/types/dto/auth.dto";
 import { Button, TextField } from "@mui/material";
 import { Form, Formik, FormikHelpers } from "formik";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 const initialValues: LoginRequestDto = {
   username: "",
@@ -14,7 +16,7 @@ const initialValues: LoginRequestDto = {
 };
 
 const LoginForm = () => {
-  const { login } = useAuthStore();
+  const dispatch = useAppDispatch();
   const router = useRouter();
   const { mutate: getMemberAuth } = useLogin();
 
@@ -22,35 +24,28 @@ const LoginForm = () => {
     values: LoginRequestDto,
     { setSubmitting }: FormikHelpers<LoginRequestDto>
   ) => {
-    login({
-      user_id: 1,
-      access_token: "token",
-      refresh_token: "refresh-token",
-    });
-    setSubmitting(false);
-    setTimeout(() => {
-      router.push("/");
-    }, 0);
-    // getMemberAuth(
-    //   { username: values.username, password: values.password },
-    //   {
-    //     onSuccess: (data: LoginResponseDto | null) => {
-    //       login({
-    //         user_id: data?.user_id ?? -1,
-    //         access_token: data?.access_token ?? "",
-    //         refresh_token: data?.refresh_token ?? "",
-    //       });
-    //       setSubmitting(false);
-    //       setTimeout(() => {
-    //         router.push("/");
-    //       }, 0);
-    //     },
-    //     onError: (e) => {
-    //       toast.error(e.message);
-    //       setSubmitting(false);
-    //     },
-    //   }
-    // );
+    getMemberAuth(
+      { username: values.username, password: values.password },
+      {
+        onSuccess: (data: LoginResponseDto | null) => {
+          dispatch(
+            login({
+              user_id: data?.user_id ?? -1,
+              access_token: data?.access_token ?? "",
+              refresh_token: data?.refresh_token ?? "",
+            })
+          );
+          setSubmitting(false);
+          setTimeout(() => {
+            router.push("/");
+          }, 0);
+        },
+        onError: (e) => {
+          toast.error(e.message);
+          setSubmitting(false);
+        },
+      }
+    );
   };
 
   return (
@@ -76,7 +71,6 @@ const LoginForm = () => {
             onChange={handleChange}
             onBlur={handleBlur}
           />
-
           <div className="flex flex-col">
             <Button
               type="submit"

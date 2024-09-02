@@ -1,12 +1,16 @@
 "use client";
 
-import useAuthStore from "@/store/auth.store";
+import { useAppDispatch } from "@/lib/hooks/redux";
+import { logout } from "@/store/auth.slice";
 
 const LogoutButton = () => {
-  const { logout } = useAuthStore();
+  const dispatch = useAppDispatch();
 
   return (
-    <button onClick={logout} className="font-bold text-comment">
+    <button
+      onClick={() => dispatch(logout())}
+      className="font-bold text-comment"
+    >
       로그아웃
     </button>
   );
