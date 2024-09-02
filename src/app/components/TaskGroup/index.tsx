@@ -46,7 +46,6 @@ const TaskGroup = ({
   );
   useEffect(() => {
     if (loadedTasks) {
-      console.log(loadedTasks);
       dispatch(
         setTasks({
           status,

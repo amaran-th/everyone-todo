@@ -6,13 +6,13 @@ import { useAxiosInfiniteQuery, useAxiosMutation } from "./useAxios";
 
 export const useTodoQuery = (todo_status: TaskStatus, keyword: string) =>
   useAxiosInfiniteQuery({
-    queryKey: QueryKeys.TASKS(todo_status), // 쿼리 키
+    queryKey: QueryKeys.TASKS(todo_status),
     queryFn: async ({ pageParam }) => {
       const searchParam =
         keyword.trim().charAt(0) === "@"
           ? { username: keyword.slice(1) }
           : { title: keyword };
-      const response = await client.get(`/Todo`, {
+      const response = await client.get(`/Todo/offset-based`, {
         params: {
           todo_status,
           page_size: 20,

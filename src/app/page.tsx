@@ -7,19 +7,18 @@ import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import BackLogAddModal from "./components/BackLogAddModal";
 import SearchBar from "./components/SearchBar";
 import TaskGroup from "./components/TaskGroup";
+import TaskAddModal from "./components/TaskAddModal";
 
 const Page = () => {
-  const [backlogAddModalOpen, setBacklogAddModalOpen] =
-    useState<boolean>(false);
+  const [addTaskStatus, setAddTaskStatus] =
+    useState<TaskStatus|null>(null);
   const [keyword, setKeyword] = useState<string>("");
   const { mutate: changeTaskStatus } = useTodoChangeStatus();
   const queryClient = useQueryClient();
 
   const onDragEnd = (result: DropResult) => {
-    console.log(result.source.droppableId);
     if (!result.destination) {
       return;
     }
@@ -65,14 +64,14 @@ const Page = () => {
               key={status}
               status={status}
               keyword={keyword}
-              openBackLogAddModal={() => setBacklogAddModalOpen(true)}
+              openBackLogAddModal={() => setAddTaskStatus(status)}
             />
           ))}
         </DragDropContext>
       </div>
-      <BackLogAddModal
-        isOpen={backlogAddModalOpen}
-        onClose={() => setBacklogAddModalOpen(false)}
+      <TaskAddModal
+        openedTaskGroup={addTaskStatus}
+        onClose={() => setAddTaskStatus(null)}
       />
     </>
   );
