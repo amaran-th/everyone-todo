@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/redux";
-import { useTodoQuery } from "@/lib/hooks/useApi";
+import { useTodoCursorQuery } from "@/lib/hooks/useApi";
 import { initializeTasks, setTasks } from "@/store/task.slice";
 import { TaskResponseDto, TaskStatus } from "@/types/dto/task.dto";
 import { Droppable } from "@hello-pangea/dnd";
@@ -28,7 +28,7 @@ const TaskGroup = ({
     isFetching,
     fetchNextPage,
     hasNextPage,
-  } = useTodoQuery(status, keyword);
+  } = useTodoCursorQuery(status, keyword);
 
   const observer = useRef<IntersectionObserver | null>(null);
   const lastTaskElementRef = useCallback(

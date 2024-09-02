@@ -18,6 +18,6 @@ export interface TaskResponseDto {
 export interface TaskPageableResponseDto {
   todos: TaskResponseDto[];
   total_count: number;
-  total_pages: number;
-  current_page: number;
+  next_cursor: string;
+  page_size: number;
 }
