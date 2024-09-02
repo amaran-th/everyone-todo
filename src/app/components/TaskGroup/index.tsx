@@ -31,6 +31,8 @@ const TaskGroup = ({
   } = useTodoCursorQuery(status, keyword);
 
   const observer = useRef<IntersectionObserver | null>(null);
+  const scrollContainerRef = useRef<HTMLElement | null>(null);
+
   const lastTaskElementRef = useCallback(
     (node: HTMLElement | null) => {
       if (isFetching || !hasNextPage) return;
@@ -87,9 +89,12 @@ const TaskGroup = ({
         {(provided, snapshot) => (
           <div
             {...provided.droppableProps}
-            ref={provided.innerRef}
+            ref={(node) => {
+              provided.innerRef(node);
+              scrollContainerRef.current = node;
+            }}
             className={classNames(
-              "flex relative overflow-y-scroll h-[70vh] flex-col gap-2",
+              "flex relative overflow-y-scroll h-[70vh] flex-col gap-2 overflow-x-visible",
               snapshot.isDraggingOver && "bg-border"
             )}
           >
@@ -97,11 +102,22 @@ const TaskGroup = ({
               if (taskGroup[status].tasks.length === index + 1) {
                 return (
                   <div ref={lastTaskElementRef} key={task.todo_id}>
-                    <Task task={task} index={index} />
+                    <Task
+                      task={task}
+                      index={index}
+                      scrollContainerRef={scrollContainerRef}
+                    />
                   </div>
                 );
               }
-              return <Task task={task} index={index} key={task.todo_id} />;
+              return (
+                <Task
+                  task={task}
+                  index={index}
+                  scrollContainerRef={scrollContainerRef}
+                  key={task.todo_id}
+                />
+              );
             })}
             {provided.placeholder}
           </div>
