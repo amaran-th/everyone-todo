@@ -1,7 +1,10 @@
+import { QueryKeys } from "@/data/queryKey";
 import { useAppSelector } from "@/lib/hooks/redux";
+import { useTodoDelete, useTodoUpdate } from "@/lib/hooks/useApi";
 import useContextMenu, { ContextMenuItem } from "@/lib/hooks/useContextMenu";
 import { TaskResponseDto } from "@/types/dto/task.dto";
 import { Draggable } from "@hello-pangea/dnd";
+import { useQueryClient } from "@tanstack/react-query";
 import classNames from "classnames";
 import { RefObject, useRef } from "react";
 
@@ -14,6 +17,10 @@ interface TaskProps {
 const Task = ({ task, index, scrollContainerRef }: TaskProps) => {
   const auth = useAppSelector((state) => state.auth.value);
   const standardContainerRef = useRef<HTMLElement | null>(null);
+
+  const queryClient = useQueryClient();
+  const { mutate: deleteTask } = useTodoDelete();
+  const { mutate: updateTask } = useTodoUpdate();
 
   const {
     contextMenuRef,
@@ -35,7 +42,16 @@ const Task = ({ task, index, scrollContainerRef }: TaskProps) => {
         label: "삭제",
         action: () =>
           handleMenuItemClick(() => {
-            console.log("Rename action is triggering");
+            deleteTask(
+              { todo_id: task.todo_id },
+              {
+                onSuccess: () => {
+                  queryClient.invalidateQueries({
+                    queryKey: QueryKeys.TASKS(task.status),
+                  });
+                },
+              }
+            );
           }),
       },
     ];

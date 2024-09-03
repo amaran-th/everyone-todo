@@ -109,3 +109,27 @@ export const useTodoChangeStatus = () =>
       });
     },
   });
+
+export const useTodoUpdate = () =>
+  useAxiosMutation({
+    mutationFn: async ({
+      todo_id,
+      title,
+      description,
+    }: {
+      todo_id: number;
+      title: string;
+      description: string;
+    }) => {
+      await authClient.patch(`/Todo/${todo_id}`, {
+        title,
+        description,
+      });
+    },
+  });
+export const useTodoDelete = () =>
+  useAxiosMutation({
+    mutationFn: async ({ todo_id }: { todo_id: number }) => {
+      await authClient.delete(`/Todo/${todo_id}`);
+    },
+  });
