@@ -4,7 +4,7 @@ import { useTodoDelete, useTodoUpdate } from "@/lib/hooks/useApi";
 import useContextMenu, { ContextMenuItem } from "@/lib/hooks/useContextMenu";
 import { TaskResponseDto } from "@/types/dto/task.dto";
 import { Draggable } from "@hello-pangea/dnd";
-import { Button, Input, TextField } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import classNames from "classnames";
 import { Form, useFormik } from "formik";
@@ -44,19 +44,12 @@ const Task = ({
 }: TaskProps) => {
   const auth = useAppSelector((state) => state.auth.value);
   const standardContainerRef = useRef<HTMLElement | null>(null);
-  const {
-    values,
-    handleSubmit,
-    handleChange,
-    setValues,
-    touched,
-    errors,
-    resetForm,
-  } = useFormik({
-    onSubmit: handlFormikSubmit,
-    initialValues: new Values(task.title, task.description),
-    validationSchema: validationSchema,
-  });
+  const { values, handleSubmit, handleChange, touched, errors, resetForm } =
+    useFormik({
+      onSubmit: handlFormikSubmit,
+      initialValues: new Values(task.title, task.description),
+      validationSchema: validationSchema,
+    });
 
   const queryClient = useQueryClient();
   const { mutate: deleteTask } = useTodoDelete();
@@ -128,35 +121,44 @@ const Task = ({
     (task.owner_id === auth.user_id || task.owner_id === null)
   )
     return (
-      <Draggable
-        key={task.todo_id}
-        draggableId={task.todo_id.toString()}
-        index={index}
-      >
-        {(provided, snapshot) => (
-          <div className="w-full bg-white rounded-md border border-border shadow-md">
-            {isModifying ? (
-              <form className="flex flex-col gap-4 p-2" onSubmit={handleSubmit}>
-                <div className="flex flex-col">
-                  <Input
-                    className="font-bold "
-                    name="title"
-                    value={values.title}
-                    onChange={handleChange}
-                  />
-                  <Input
-                    className="!text-comment !text-sm"
-                    name="description"
-                    multiline={true}
-                    value={values.description}
-                    onChange={handleChange}
-                  />
-                </div>
-                <Button type="submit" variant="contained" size="small">
-                  수정
-                </Button>
-              </form>
-            ) : (
+      <>
+        {isModifying ? (
+          <form
+            className="w-full bg-white rounded-md border border-border shadow-md flex flex-col gap-4 p-2"
+            onSubmit={handleSubmit}
+          >
+            <div className="flex flex-col">
+              <TextField
+                className="!font-bold "
+                variant="standard"
+                name="title"
+                value={values.title}
+                onChange={handleChange}
+                error={touched.title && !!errors.title}
+                helperText={touched.title && errors.title}
+              />
+              <TextField
+                className="[&_textarea]:text-comment [&_textarea]:text-sm"
+                variant="standard"
+                name="description"
+                multiline={true}
+                value={values.description}
+                onChange={handleChange}
+                error={touched.description && !!errors.description}
+                helperText={touched.description && errors.description}
+              />
+            </div>
+            <Button type="submit" variant="contained" size="small">
+              수정
+            </Button>
+          </form>
+        ) : (
+          <Draggable
+            key={task.todo_id}
+            draggableId={task.todo_id.toString()}
+            index={index}
+          >
+            {(provided, snapshot) => (
               <div
                 ref={(node) => {
                   provided.innerRef(node);
@@ -165,7 +167,7 @@ const Task = ({
                 {...provided.draggableProps}
                 {...provided.dragHandleProps}
                 className={classNames(
-                  "transition-colors hover:bg-border touch-none p-2",
+                  "w-full bg-white rounded-md border border-border shadow-md transition-colors hover:bg-border touch-none p-2",
                   snapshot.isDragging && "bg-border"
                 )}
                 onContextMenu={handleRightClick}
@@ -191,26 +193,26 @@ const Task = ({
                 </p>
               </div>
             )}
-            {contextMenuState.isOpen && (
+          </Draggable>
+        )}
+        {contextMenuState.isOpen && (
+          <div
+            ref={contextMenuRef}
+            className="fixed rounded bg-white border border-border shadow z-50"
+            style={{ top: contextMenuState.y, left: contextMenuState.x }}
+          >
+            {contextMenuState.menuItems.map((item) => (
               <div
-                ref={contextMenuRef}
-                className="fixed rounded bg-white border border-border shadow z-50"
-                style={{ top: contextMenuState.y, left: contextMenuState.x }}
+                key={item.label}
+                className="px-4 py-2 cursor-pointer hover:bg-gray-200"
+                onClick={() => item.action()}
               >
-                {contextMenuState.menuItems.map((item) => (
-                  <div
-                    key={item.label}
-                    className="px-4 py-2 cursor-pointer hover:bg-gray-200"
-                    onClick={() => item.action()}
-                  >
-                    {item.label}
-                  </div>
-                ))}
+                {item.label}
               </div>
-            )}
+            ))}
           </div>
         )}
-      </Draggable>
+      </>
     );
   return (
     <div

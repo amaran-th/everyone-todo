@@ -96,9 +96,7 @@ const useContextMenu = () => {
         } = initialPositionRef.current;
         const { scrollLeft, scrollTop } = scrollContainerRef.current;
         const top = standardContainerRef.current?.offsetTop;
-        console.log(scrollTop);
-        console.log(initialScrollY);
-        const adjustedX = initialX - scrollLeft;
+        const adjustedX = initialX + (initialScrollX - scrollLeft);
         const adjustedY = initialY + (initialScrollY - scrollTop);
 
         setContextMenuState((prevState) => ({
