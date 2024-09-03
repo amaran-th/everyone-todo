@@ -21,22 +21,35 @@ const useContextMenu = () => {
   });
 
   const contextMenuRef = useRef<HTMLDivElement>(null);
-  const initialPositionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const initialPositionRef = useRef<{
+    x: number;
+    y: number;
+    scrollX: number;
+    scrollY: number;
+  }>({ x: 0, y: 0, scrollX: 0, scrollY: 0 });
   const scrollContainerRef = useRef<HTMLElement | null>(null);
+  const standardContainerRef = useRef<HTMLElement | null>(null);
 
   const handleContextMenu = useCallback(
     (
       event: React.MouseEvent,
       menuItems: ContextMenuItem[],
-      scrollContainer: HTMLElement | null
+      scrollContainer: HTMLElement | null,
+      standardContainer: HTMLElement | null
     ) => {
       event.preventDefault();
 
       const clickX = event.clientX;
       const clickY = event.clientY;
 
-      initialPositionRef.current = { x: clickX, y: clickY };
+      initialPositionRef.current = {
+        x: clickX,
+        y: clickY,
+        scrollX: scrollContainer?.scrollLeft ?? 0,
+        scrollY: scrollContainer?.scrollTop ?? 0,
+      };
       scrollContainerRef.current = scrollContainer;
+      standardContainerRef.current = standardContainer;
 
       setContextMenuState({
         x: clickX,
@@ -75,11 +88,18 @@ const useContextMenu = () => {
 
     const adjustPositionOnScroll = () => {
       if (contextMenuState.isOpen && scrollContainerRef.current) {
-        const { x: initialX, y: initialY } = initialPositionRef.current;
+        const {
+          x: initialX,
+          y: initialY,
+          scrollX: initialScrollX,
+          scrollY: initialScrollY,
+        } = initialPositionRef.current;
         const { scrollLeft, scrollTop } = scrollContainerRef.current;
-
+        const top = standardContainerRef.current?.offsetTop;
+        console.log(scrollTop);
+        console.log(initialScrollY);
         const adjustedX = initialX - scrollLeft;
-        const adjustedY = initialY - scrollTop;
+        const adjustedY = initialY + (initialScrollY - scrollTop);
 
         setContextMenuState((prevState) => ({
           ...prevState,

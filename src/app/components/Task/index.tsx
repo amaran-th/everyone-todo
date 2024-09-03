@@ -3,16 +3,17 @@ import useContextMenu, { ContextMenuItem } from "@/lib/hooks/useContextMenu";
 import { TaskResponseDto } from "@/types/dto/task.dto";
 import { Draggable } from "@hello-pangea/dnd";
 import classNames from "classnames";
-import ContextMenu from "../ContextMenu";
+import { RefObject, useRef } from "react";
 
 interface TaskProps {
   task: TaskResponseDto;
   index: number;
-  scrollContainerRef: React.RefObject<HTMLElement>;
+  scrollContainerRef: RefObject<HTMLElement>;
 }
 
 const Task = ({ task, index, scrollContainerRef }: TaskProps) => {
   const auth = useAppSelector((state) => state.auth.value);
+  const standardContainerRef = useRef<HTMLElement | null>(null);
 
   const {
     contextMenuRef,
@@ -39,7 +40,12 @@ const Task = ({ task, index, scrollContainerRef }: TaskProps) => {
       },
     ];
 
-    handleContextMenu(event, menuItems, scrollContainerRef.current!!);
+    handleContextMenu(
+      event,
+      menuItems,
+      scrollContainerRef.current!!,
+      standardContainerRef.current!!
+    );
   };
 
   if (
@@ -55,7 +61,10 @@ const Task = ({ task, index, scrollContainerRef }: TaskProps) => {
         {(provided, snapshot) => (
           <>
             <div
-              ref={provided.innerRef}
+              ref={(node) => {
+                provided.innerRef(node);
+                standardContainerRef.current = node;
+              }}
               {...provided.draggableProps}
               {...provided.dragHandleProps}
               className={classNames(
@@ -86,13 +95,13 @@ const Task = ({ task, index, scrollContainerRef }: TaskProps) => {
               {contextMenuState.isOpen && (
                 <div
                   ref={contextMenuRef}
-                  className="fixed rounded bg-white border border-border shadow py-1"
+                  className="fixed rounded bg-white border border-border shadow"
                   style={{ top: contextMenuState.y, left: contextMenuState.x }}
                 >
                   {contextMenuState.menuItems.map((item) => (
                     <div
                       key={item.label}
-                      className="px-4 py-2 cursor-pointer hover:bg-gray-201"
+                      className="px-4 py-2 cursor-pointer hover:bg-gray-200"
                       onClick={() => item.action()}
                     >
                       {item.label}
