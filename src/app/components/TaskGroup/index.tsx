@@ -5,7 +5,7 @@ import { TaskResponseDto, TaskStatus } from "@/types/dto/task.dto";
 import { Droppable } from "@hello-pangea/dnd";
 import { CgMathPlus } from "@react-icons/all-files/cg/CgMathPlus";
 import classNames from "classnames";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Task from "../Task";
 
 interface TaskGroupProps {
@@ -22,6 +22,8 @@ const TaskGroup = ({
   const taskGroup = useAppSelector((state) => state.tasks.value);
   const userId = useAppSelector((state) => state.auth.value.user_id);
   const dispatch = useAppDispatch();
+
+  const [modifyingTask, setModifyingTask] = useState<number>(-1);
 
   const {
     data: loadedTasks,
@@ -106,6 +108,8 @@ const TaskGroup = ({
                       task={task}
                       index={index}
                       scrollContainerRef={scrollContainerRef}
+                      isModifying={modifyingTask === task.todo_id}
+                      setModifyingTask={setModifyingTask}
                     />
                   </div>
                 );
@@ -115,6 +119,8 @@ const TaskGroup = ({
                   task={task}
                   index={index}
                   scrollContainerRef={scrollContainerRef}
+                  isModifying={modifyingTask === task.todo_id}
+                  setModifyingTask={setModifyingTask}
                   key={task.todo_id}
                 />
               );
