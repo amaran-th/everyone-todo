@@ -4,33 +4,56 @@ import { TaskStatus } from "@/types/dto/task.dto";
 import { authClient, client } from "../api/client.axios";
 import { useAxiosInfiniteQuery, useAxiosMutation } from "./useAxios";
 
-export const useTodoQuery = (todo_status: TaskStatus, keyword: string) =>
+// deprecated
+// export const useTodoOffsetQuery = (todo_status: TaskStatus, keyword: string) =>
+//   useAxiosInfiniteQuery({
+//     queryKey: QueryKeys.TASKS(todo_status),
+//     queryFn: async ({ pageParam }) => {
+//       const searchParam =
+//         keyword.trim().charAt(0) === "@"
+//           ? { username: keyword.slice(1) }
+//           : { title: keyword };
+//       const response = await client.get(`/Todo/offset-based`, {
+//         params: {
+//           todo_status,
+//           page_size: 20,
+//           page_number: pageParam,
+//           ...searchParam,
+//         },
+//       });
+//       return response.data;
+//     },
+//     getNextPageParam: (lastPage) => {
+//       const { current_page, total_pages } = lastPage;
+//       if (current_page < total_pages) {
+//         return current_page + 1;
+//       } else {
+//         return undefined;
+//       }
+//     },
+//     initialPageParam: 1,
+//   });
+
+export const useTodoCursorQuery = (todo_status: TaskStatus, keyword: string) =>
   useAxiosInfiniteQuery({
-    queryKey: QueryKeys.TASKS(todo_status), // 쿼리 키
+    queryKey: QueryKeys.TASKS(todo_status),
     queryFn: async ({ pageParam }) => {
       const searchParam =
         keyword.trim().charAt(0) === "@"
           ? { username: keyword.slice(1) }
           : { title: keyword };
-      const response = await client.get(`/Todo`, {
+      const response = await client.get(`/Todo/cursor-based`, {
         params: {
           todo_status,
-          page_size: 20,
-          page_number: pageParam,
+          cursor: pageParam,
+          size: 20,
           ...searchParam,
         },
       });
       return response.data;
     },
-    getNextPageParam: (lastPage) => {
-      const { current_page, total_pages } = lastPage;
-      if (current_page < total_pages) {
-        return current_page + 1;
-      } else {
-        return undefined;
-      }
-    },
-    initialPageParam: 1,
+    getNextPageParam: ({ next_cursor }) => next_cursor,
+    initialPageParam: null,
   });
 
 export const useLogin = () =>
@@ -84,5 +107,29 @@ export const useTodoChangeStatus = () =>
       await authClient.patch(`/Todo/${todo_id}/status`, null, {
         params: { new_status },
       });
+    },
+  });
+
+export const useTodoUpdate = () =>
+  useAxiosMutation({
+    mutationFn: async ({
+      todo_id,
+      title,
+      description,
+    }: {
+      todo_id: number;
+      title: string;
+      description: string;
+    }) => {
+      await authClient.patch(`/Todo/${todo_id}`, {
+        title,
+        description,
+      });
+    },
+  });
+export const useTodoDelete = () =>
+  useAxiosMutation({
+    mutationFn: async ({ todo_id }: { todo_id: number }) => {
+      await authClient.delete(`/Todo/${todo_id}`);
     },
   });

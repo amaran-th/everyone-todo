@@ -1,11 +1,11 @@
 import { useAppDispatch, useAppSelector } from "@/lib/hooks/redux";
-import { useTodoQuery } from "@/lib/hooks/useApi";
+import { useTodoCursorQuery } from "@/lib/hooks/useApi";
 import { initializeTasks, setTasks } from "@/store/task.slice";
 import { TaskResponseDto, TaskStatus } from "@/types/dto/task.dto";
 import { Droppable } from "@hello-pangea/dnd";
 import { CgMathPlus } from "@react-icons/all-files/cg/CgMathPlus";
 import classNames from "classnames";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Task from "../Task";
 
 interface TaskGroupProps {
@@ -23,14 +23,18 @@ const TaskGroup = ({
   const userId = useAppSelector((state) => state.auth.value.user_id);
   const dispatch = useAppDispatch();
 
+  const [modifyingTask, setModifyingTask] = useState<number>(-1);
+
   const {
     data: loadedTasks,
     isFetching,
     fetchNextPage,
     hasNextPage,
-  } = useTodoQuery(status, keyword);
+  } = useTodoCursorQuery(status, keyword);
 
   const observer = useRef<IntersectionObserver | null>(null);
+  const scrollContainerRef = useRef<HTMLElement | null>(null);
+
   const lastTaskElementRef = useCallback(
     (node: HTMLElement | null) => {
       if (isFetching || !hasNextPage) return;
@@ -46,7 +50,6 @@ const TaskGroup = ({
   );
   useEffect(() => {
     if (loadedTasks) {
-      console.log(loadedTasks);
       dispatch(
         setTasks({
           status,
@@ -88,9 +91,12 @@ const TaskGroup = ({
         {(provided, snapshot) => (
           <div
             {...provided.droppableProps}
-            ref={provided.innerRef}
+            ref={(node) => {
+              provided.innerRef(node);
+              scrollContainerRef.current = node;
+            }}
             className={classNames(
-              "flex relative overflow-y-scroll h-[70vh] flex-col gap-2",
+              "flex relative overflow-y-scroll h-[70vh] flex-col gap-2 overflow-x-visible",
               snapshot.isDraggingOver && "bg-border"
             )}
           >
@@ -98,11 +104,26 @@ const TaskGroup = ({
               if (taskGroup[status].tasks.length === index + 1) {
                 return (
                   <div ref={lastTaskElementRef} key={task.todo_id}>
-                    <Task task={task} index={index} />
+                    <Task
+                      task={task}
+                      index={index}
+                      scrollContainerRef={scrollContainerRef}
+                      isModifying={modifyingTask === task.todo_id}
+                      setModifyingTask={setModifyingTask}
+                    />
                   </div>
                 );
               }
-              return <Task task={task} index={index} key={task.todo_id} />;
+              return (
+                <Task
+                  task={task}
+                  index={index}
+                  scrollContainerRef={scrollContainerRef}
+                  isModifying={modifyingTask === task.todo_id}
+                  setModifyingTask={setModifyingTask}
+                  key={task.todo_id}
+                />
+              );
             })}
             {provided.placeholder}
           </div>

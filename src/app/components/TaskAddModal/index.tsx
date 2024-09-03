@@ -1,30 +1,35 @@
+import { QueryKeys } from "@/data/queryKey";
 import { useBackLogFileImport } from "@/lib/hooks/useApi";
 import useClickOutside from "@/lib/hooks/useOnClickOutside";
+import { TaskStatus } from "@/types/dto/task.dto";
 import { Button } from "@mui/material";
 import { VscClose } from "@react-icons/all-files/vsc/VscClose";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { toast } from "react-toastify";
 
-interface BackLogAddModalProps {
-  isOpen: boolean;
+interface TaskAddModalProps {
+  openedTaskGroup: TaskStatus|null;
   onClose: () => void;
 }
-const BackLogAddModal = ({ isOpen, onClose }: BackLogAddModalProps) => {
+const TaskAddModal = ({ openedTaskGroup, onClose }: TaskAddModalProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const { mutate: uploadBacklogFile, isPending } = useBackLogFileImport();
+  const { mutate: uploadTaskFile, isPending } = useBackLogFileImport();
+  const queryClient = useQueryClient()
   const [file, setFile] = useState<File | undefined>();
   useClickOutside(ref, onClose);
 
   const handleSubmitButtonClick = () => {
-    uploadBacklogFile(file!!, {
+    uploadTaskFile(file!!, {
       onSuccess: () => {
         onClose();
-        toast.success("Backlog 데이터가 성공적으로 업로드되었습니다.");
+        queryClient.invalidateQueries({queryKey:QueryKeys.TASKS(openedTaskGroup!!)})
+        toast.success(`Task 데이터가 성공적으로 ${openedTaskGroup}에 업로드되었습니다.`);
       },
     });
   };
 
-  if (!isOpen) return null;
+  if (!openedTaskGroup) return null;
   return (
     <div className="fixed inset-0 flex justify-center items-center backdrop-blur-sm">
       <div
@@ -40,7 +45,7 @@ const BackLogAddModal = ({ isOpen, onClose }: BackLogAddModalProps) => {
           </button>
         </div>
         <div className="flex flex-col items-center gap-4">
-          <p>Backlog 데이터가 담긴 Excel 파일(.xlsx)을 업로드해주세요.</p>
+          <p>Task 데이터가 담긴 Excel 파일(.xlsx)을 업로드해주세요.</p>
           <input
             type="file"
             accept=".xlsx"
@@ -62,4 +67,4 @@ const BackLogAddModal = ({ isOpen, onClose }: BackLogAddModalProps) => {
   );
 };
 
-export default BackLogAddModal;
+export default TaskAddModal;
