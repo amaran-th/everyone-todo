@@ -22,6 +22,7 @@
     "classnames": "^2.5.1",
     "formik": "^2.4.6",
     "next": "14.2.5",
+    "next-auth": "^4.24.7",
     "react": "^18",
     "react-cookies": "^0.1.1",
     "react-dom": "^18",
