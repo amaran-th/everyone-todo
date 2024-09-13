@@ -8,6 +8,9 @@ const MuiThemeProvider = ({ children }: React.PropsWithChildren) => {
       primary: {
         main: "#00D4B7",
       },
+      secondary: {
+        main: "#FEE500",
+      },
     },
     typography: {
       fontFamily: ["Binggrae", "Pretendard-Regular"].join(","),

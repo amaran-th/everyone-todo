@@ -1,5 +1,8 @@
-import { Box } from "@mui/material";
+import { Box, Button, Divider } from "@mui/material";
 import LoginForm from "./components/LoginForm";
+import Link from "next/link";
+import Image from "next/image";
+import KakaoSymbol from "@/assets/images/login/kakao_symbol.svg";
 
 const Page = () => {
   return (
@@ -15,6 +18,15 @@ const Page = () => {
           <div className="flex flex-col gap-8">
             <LoginForm />
           </div>
+          <Divider orientation="horizontal" variant="fullWidth" flexItem />
+          <Button
+            color="secondary"
+            variant="contained"
+            size="large"
+            startIcon={<KakaoSymbol className="w-5 h-5" />}
+          >
+            카카오로 시작하기
+          </Button>
         </div>
       </div>
     </div>
